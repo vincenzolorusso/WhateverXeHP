@@ -1,0 +1,21 @@
+name: Build Kexts su macOS
+on: [push]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Scarica MacKernelSDK
+      run: git clone https://github.com/acidanthera/MacKernelSDK
+    - name: Scarica Lilu DEBUG
+      run: |
+        curl -L -o Lilu.zip https://github.com/acidanthera/Lilu/releases/latest/download/Lilu-DEBUG.zip
+        unzip Lilu.zip -d Lilu_Folder
+        cp -R Lilu_Folder/Lilu.kext .
+    - name: Compila WhateverXe
+      run: python3 tools/build.py
+    - name: Carica i Kext finiti
+      uses: actions/upload-artifact@v4
+      with:
+        name: Miei-Kext
+        path: build/
