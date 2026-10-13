@@ -15,7 +15,8 @@ inline bool adln(uint32_t pci,uint8_t revision) {
 // Keep MI646's qualified TC2 policy unchanged. Other TGL TC transports are
 // not admitted by the ADL-N extension, even when their numeric DDI matches.
 template<class IO> uint32_t tglMode(IO &io,uint32_t ddi) {
-    return XELP::legacyTGLMode(io,ddi,1U<<4);
+    uint32_t admittedPorts = (1U<<0) | (1U<<1) | (1U<<4);
+    return XELP::legacyTGLMode(io, ddi, admittedPorts);
 }
 }
 #endif
