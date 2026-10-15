@@ -1,0 +1,25 @@
+name: Compila Kexts Modificati
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Scarica MacKernelSDK
+      run: git clone https://github.com/acidanthera/MacKernelSDK
+
+    - name: Scarica Lilu
+      run: |
+        curl -L -o Lilu.zip https://github.com/acidanthera/Lilu/releases/latest/download/Lilu-DEBUG.zip
+        unzip Lilu.zip -d Lilu_Folder
+        cp -R Lilu_Folder/Lilu.kext .
+
+    - name: Compila il progetto
+      run: python3 tools/build.py
+
+    - name: Trova e salva TUTTI i Kext
+      uses: actions/upload-artifact@v4
+      with:
+        name: Kext-Completati
+        path: '**/*.kext'
