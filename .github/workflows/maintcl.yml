@@ -2,7 +2,7 @@ name: Compila Tutti i Kext
 on: [push, workflow_dispatch]
 jobs:
   build:
-    runs-on: macos-13
+    runs-on: macos-15-intel
     steps:
     - uses: actions/checkout@v4
 
@@ -15,13 +15,11 @@ jobs:
         unzip Lilu.zip -d Lilu_Folder
         cp -R Lilu_Folder/Lilu.kext .
 
-    - name: Compila TUTTI i target (WhateverXe + Compat)
-      run: |
-        python3 tools/build.py || true
-        xcodebuild -alltargets -configuration Release || true
+    - name: Compila WhateverXe e AppleIntelTGLCompat
+      run: python3 tools/build.py --release
 
     - name: Salva i Kext generati
       uses: actions/upload-artifact@v4
       with:
         name: Kext-Finali
-        path: '**/*.kext'
+        path: build/*.kext
