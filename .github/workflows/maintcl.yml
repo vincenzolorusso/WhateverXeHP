@@ -9,9 +9,9 @@ jobs:
     - name: Scarica MacKernelSDK
       run: git clone https://github.com/acidanthera/MacKernelSDK
 
-    - name: Scarica Lilu
+    - name: Scarica Lilu 1.7.2
       run: |
-        curl -L -o Lilu.zip https://github.com/acidanthera/Lilu/releases/latest/download/Lilu-DEBUG.zip
+        curl -L -o Lilu.zip https://github.com/acidanthera/Lilu/releases/download/1.7.2/Lilu-1.7.2-DEBUG.zip
         unzip Lilu.zip -d Lilu_Folder
         cp -R Lilu_Folder/Lilu.kext .
 
@@ -22,4 +22,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Kext-Finali
-        path: build/*.kext
+        path: '**/*.kext'
