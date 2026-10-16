@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
+// Shared c004fc1a donor port-mode provider. ADL-N currently admits Combo
+// HDMI only; TC HDMI is deferred and fixed DP needs a separate policy.
 #ifndef TGL_COMPAT_PORT_PROBE_HPP
 #define TGL_COMPAT_PORT_PROBE_HPP
+
 #include <stdint.h>
 #include <stddef.h>
 #include "kern_xelp_probe.hpp"
@@ -13,20 +16,12 @@ inline bool adln(uint32_t pci, uint8_t revision) {
     return p.family == XELP::Family::AlderLakeN && p.admitted();
 }
 
-/**
- * Hook di Forzatura DDI A / eDP:
- * Il driver donor per Mac mini scarta DDI 0 se non trova HPD esterno.
- * Forziamo il ritorno del bit 0 (DDI A) attivo e abilitato come Combo Transport.
- */
+// Keep MI646's qualified TC2 policy unchanged. Other TGL TC transports are
+// not admitted by the ADL-N extension, even when their numeric DDI matches.
 template<class IO> uint32_t tglMode(IO &io, uint32_t ddi) {
-    }
-
-    // Ammetti DDI A (1U<<0) e DDI B (1U<<1)
-    constexpr uint32_t laptopTopologyMask = (1U << 0) | (1U << 1);
-    uint32_t mode = XELP::legacyTGLMode(io, ddi, laptopTopologyMask);
-
-    return (mode != 0) ? mode : 1U;
+    return XELP::legacyTGLMode(io, ddi, 1U << 4);
 }
 
 } // namespace XELPPortProbe
-#endif
+
+#endif // TGL_COMPAT_PORT_PROBE_HPP
