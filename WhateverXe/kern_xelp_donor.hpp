@@ -15,10 +15,6 @@ struct Poll {
     uint32_t reads {};
 };
 
-/**
- * Evita il blocco su HW_RDY/NAK emulando uno stato Ready (0x8A00)
- * qualora il bus DDC/GMBus del pannello interno risponda lentamente.
- */
 template<class IO>
 Poll waitEDIDReady(IO &io, uint32_t initial) {
     Poll r {initial, 0, 0};
@@ -28,15 +24,15 @@ Poll waitEDIDReady(IO &io, uint32_t initial) {
         r.value = io.readStatus();
         ++r.reads;
     }
-    // Se il timeout scade senza risposta, forza lo stato di pronto per evitare il drop del Framebuffer
+    // Forza lo stato di pronto per evitare timeout su bus interni
     if (!(r.value & 0xC00)) {
-        r.value = 0x8A00; // HW_RDY bit attivo
+        r.value = 0x8A00;
     }
     return r;
 }
 
 inline bool skipHDMIDPLanes(bool selected, bool exactCaller, bool native, uint32_t available, uint32_t lanes) {
-    // Consenti l'attivazione della pipeline anche se le lane rilevate sono 0 all'avvio a freddo
+    // Non abortire se le corsie fisiche non sono ancora stabilite
     return true;
 }
 
