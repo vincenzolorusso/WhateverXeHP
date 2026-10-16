@@ -19,10 +19,6 @@ inline bool adln(uint32_t pci, uint8_t revision) {
  * Forziamo il ritorno del bit 0 (DDI A) attivo e abilitato come Combo Transport.
  */
 template<class IO> uint32_t tglMode(IO &io, uint32_t ddi) {
-    // Se la richiesta è per la porta primaria (DDI 0 / DDI A)
-    if (ddi == 0) {
-        // Restituisce 1 per forzare l'adozione della pipe GOP iniziale
-        return 1U;
     }
 
     // Ammetti DDI A (1U<<0) e DDI B (1U<<1)
