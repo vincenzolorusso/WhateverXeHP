@@ -15,40 +15,21 @@ inline bool adln(uint32_t pci, uint8_t revision) {
 }
 
 /**
- * Funzione hardware di basso livello (MMIO) per accendere il pannello LCD.
- * Risolve il freeze forzando l'alimentazione (VDD) prima del Link Training.
+ * Hook di bypass per l'accelerazione eDP:
+ * Il driver nativo legge le porte in sola lettura (ProbeIO).
+ * Forziamo la risposta software a "1U" (Connesso) per DDI 0, 
+ * costringendo l'acceleratore 3D a registrarsi al servizio.
  */
-template<class IO>
-void powerOnInternalPanel(IO &io) {
-    // Registri PPS (Panel Power Sequencing) Gen12
-    constexpr uint32_t PP_STATUS  = 0x61200;
-    constexpr uint32_t PP_CONTROL = 0x61204;
-    
-    // 1. Verifica se il pannello e' gia' alimentato (Bit 31: Panel Power On Status)
-    if (io.read(PP_STATUS) & 0x80000000U) return;
-
-    // 2. Forza VDD (Bit 3) e Power Target On (Bit 0). Chiave di sblocco scrittura = 0xABCD0000
-    uint32_t ctrl = io.read(PP_CONTROL) & 0x0000FFFFU;
-    io.write(PP_CONTROL, 0xABCD0000U | ctrl | 0x09U);
-
-    // 3. Attendi che il chip TCON del display risponda e sia pronto (timeout di ~300 ms)
-    for (unsigned i = 0; i < 300; ++i) {
-        if (io.read(PP_STATUS) & 0x80000000U) break;
-        io.sleepMs(1);
-    }
-}
-
 template<class IO> uint32_t tglMode(IO &io, uint32_t ddi) {
+    // Forza la connessione software per la porta DDI 0 (Schermo Interno Laptop)
     if (ddi == 0) {
-        // Accendi l'elettricità del display prima che il driver Apple lo interroghi
-        powerOnInternalPanel(io);
-        
-        // Dichiara la porta connessa per far avviare l'acceleratore
-        return 1U; 
+        return 1U;
     }
 
+    // Per le altre porte fisiche (HDMI/DP), applica la maschera estesa
     constexpr uint32_t admitted = (1U << 0) | (1U << 1) | (1U << 4);
     uint32_t mode = XELP::legacyTGLMode(io, ddi, admitted);
+    
     return (mode != 0) ? mode : 1U;
 }
 
