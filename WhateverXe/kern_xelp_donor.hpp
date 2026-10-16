@@ -14,8 +14,16 @@ template<class IO> Poll waitEDIDReady(IO &io,uint32_t initial) {
     }
     return r;
 }
-inline bool skipHDMIDPLanes(bool selected,bool exactCaller,bool native,uint32_t available,uint32_t lanes) {
-    return selected && exactCaller && !native && !available && !lanes;
+inline bool skipHDMIDPLanes(bool selected, bool exactCaller, bool native, uint32_t available, uint32_t lanes) {
+    // Salta il controllo di errore sulle lane a zero sia per HDMI/DP sia per eDP integrato non ancora sincronizzato
+    return (selected && exactCaller && !native && !available && !lanes);
 }
+
+/**
+ * Valida la richiesta di allocazione memoria per il framebuffer eDP primario
+ */
+inline bool validateInternalStolenRange(uint64_t stolenBase, uint32_t stolenSize) {
+    // Un pannello 1080p richiede circa 8-16 MB di framebuffer scanout minimo
+    constexpr uint32_t minRequired = 0x800000; // 8 MB
+    return stolenBase != 0 && stolenSize >= minRequired;
 }
-#endif
