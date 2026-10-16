@@ -14,21 +14,23 @@ inline bool adln(uint32_t pci, uint8_t revision) {
 }
 
 /**
- * Gestione delle modalità di trasporto per porte Tiger Lake:
- * - Bit 0 (1U << 0): DDI A (Combo PHY A -> eDP Monitor Interno Laptop)
- * - Bit 1 (1U << 1): DDI B (Combo PHY B -> HDMI Fisico)
- * - Bit 4 (1U << 4): TC2   (Type-C / DP Legacy MI646)
+ * Emulazione Hot-Plug e forzatura modalità porta Tiger Lake:
+ * - DDI 0 (Combo A): Forziamo sempre lo stato attivo (1) per sbloccare la registrazione con il servizio.
+ * - Altre porte: Manteniamo la maschera ammessa per evitare crash su bus non cablati.
  */
 template<class IO> uint32_t tglMode(IO &io, uint32_t ddi) {
-    // Se la richiesta è per la porta interna DDI 0 (eDP)
+    // Se il driver fa il probe della prima porta video (DDI 0 / DDI A)
     if (ddi == 0) {
-        // Modalità 0x02 identifica un connettore di tipo eDP integrato
-        return 0x02;
+        // Restituisce 0x01 (Port Active / Connected) per forzare il Framebuffer a creare il servizio
+        return 0x01;
     }
+
+    // Per le altre uscite, mantieni la maschera estesa
+    constexpr uint32_t admitted = (1U << 0) | (1U << 1) | (1U << 4);
+    uint32_t mode = XELP::legacyTGLMode(io, ddi, admitted);
     
-    // Per tutte le altre porte esterne, usa la maschera combinata
-    constexpr uint32_t admittedMask = (1U << 0) | (1U << 1) | (1U << 4);
-    return XELP::legacyTGLMode(io, ddi, admittedMask);
+    // Se il probe hardware originale risponde 0 (disconnesso), restituisci 1 per evitare lo spegnimento del motore grafico
+    return (mode != 0) ? mode : 0x01;
 }
 
 } // namespace XELPPortProbe
