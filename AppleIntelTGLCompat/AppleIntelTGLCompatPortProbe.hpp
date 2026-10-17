@@ -15,23 +15,17 @@ inline bool adln(uint32_t pci, uint8_t revision) {
 }
 
 /**
- * Hook di bypass per l'accelerazione eDP:
- * Il driver nativo legge le porte in sola lettura (ProbeIO).
- * Forziamo la risposta software a "1U" (Connesso) per DDI 0, 
- * costringendo l'acceleratore 3D a registrarsi al servizio.
+ * Mappatura connettori Tiger Lake:
+ * - Bit 0 (1U << 0): DDI A (Display interno / Combo A)
+ * - Bit 1 (1U << 1): DDI B (HDMI fisico / Combo B)
+ * - Bit 4 (1U << 4): TC2   (Type-C / DP MI646)
  */
 template<class IO> uint32_t tglMode(IO &io, uint32_t ddi) {
-    // Forza la connessione software per la porta DDI 0 (Schermo Interno Laptop)
-    if (ddi == 0) {
-        return 1U;
-    }
-
-    // Per le altre porte fisiche (HDMI/DP), applica la maschera estesa
+    // Ammetti formalmente DDI A, DDI B e TC2 nella matrice di trasporto
     constexpr uint32_t admitted = (1U << 0) | (1U << 1) | (1U << 4);
-    uint32_t mode = XELP::legacyTGLMode(io, ddi, admitted);
-    
-    return (mode != 0) ? mode : 1U;
+    return XELP::legacyTGLMode(io, ddi, admitted);
 }
 
 } // namespace XELPPortProbe
-#endif
+
+#endif // TGL_COMPAT_PORT_PROBE_HPP
