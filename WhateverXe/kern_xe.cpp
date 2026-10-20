@@ -51,6 +51,7 @@
 #include "kern_tgl_submit_history.hpp"
 #include "kern_tgl_hang_select.hpp"
 #include "kern_tgl_recovery.hpp"
+#include "kern_tgl_edp.hpp" // Aggiunto per le modifiche eDP
 #include "kern_tgl_aux_call.hpp"
 
 #include <Headers/kern_api.hpp>
