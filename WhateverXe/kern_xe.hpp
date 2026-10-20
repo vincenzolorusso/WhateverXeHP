@@ -237,6 +237,11 @@ private:
 	mach_vm_address_t orgTGLScanoutAllocate {}, orgTGLScanoutSetup {}, orgTGLPlaneUpdate {}, orgTGLAperture {};
 	mach_vm_address_t orgTGLPlaneSetup {}, orgTGLColorMode {}, orgTGLPixelInfo {};
 	mach_vm_address_t orgTGLGamma10 {}, orgTGLRegisterWrite {}, orgTGLFastRegisterWrite {};
+// --- Inizio modifiche eDP ---
+	mach_vm_address_t orgPowerOnPanel {}, orgHwSetBacklight {};
+	static uint32_t wrapPowerOnPanel(void *fb);
+	static void wrapHwSetBacklight(void *controller, uint32_t backlight);
+	// --- Fine modifiche eDP ---
 	static void wrapTGLGamma10(void *path, void *transaction, uint32_t control);
 	static void wrapTGLRegisterWrite(void *access, unsigned long reg, uint32_t value);
 	static void wrapTGLFastRegisterWrite(void *access, unsigned long reg, uint32_t value);
