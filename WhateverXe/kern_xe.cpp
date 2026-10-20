@@ -10088,6 +10088,17 @@ bool XE::processKextFull(KernelPatcher &patcher, size_t index, mach_vm_address_t
 				IORegistryEntry::getRegistryRoot()->setProperty("TGLWEGRouteAGDCAUX", routed);
 				patcher.clearError();
 			}
+{
+				// --- Inizio modifiche eDP ---
+				KernelPatcher::RouteRequest edpRoutes[] {
+					{"__ZN21AppleIntelFramebuffer12powerOnPanelEv", wrapPowerOnPanel, orgPowerOnPanel},
+					{"__ZN31AppleIntelFramebufferController14hwSetBacklightEj", wrapHwSetBacklight, orgHwSetBacklight}
+				};
+				const bool routed = patcher.routeMultiple(index, edpRoutes, arrsize(edpRoutes), address, size);
+				IORegistryEntry::getRegistryRoot()->setProperty("WhateverXeRouteEDP", routed);
+				patcher.clearError();
+				// --- Fine modifiche eDP ---
+			}
 			{
 				KernelPatcher::RouteRequest observe("__ZN31AppleIntelFramebufferController13GetPortStatusEP16AGDCPortStatus_tS1_", wrapTGLAGDCPortStatus, orgTGLAGDCPortStatus);
 				const bool routed = patcher.routeMultiple(index, &observe, 1, address, size);
